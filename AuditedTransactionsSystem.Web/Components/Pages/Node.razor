@@ -1,0 +1,29 @@
+@page "/node"
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+
+@inject NodeApiClient NodeApi
+
+<PageTitle>Node</PageTitle>
+
+<h1>Details</h1>
+
+<p>This component demonstrates showing data loaded from a backend API service.</p>
+
+@if (details == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>@details</p>
+}
+
+@code {
+    private NodeDetails? details;
+
+    protected override async Task OnInitializedAsync()
+    {
+        details = await NodeApi.NodeDetails();
+    }
+}
