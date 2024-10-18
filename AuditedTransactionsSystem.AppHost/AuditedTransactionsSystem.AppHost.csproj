@@ -9,7 +9,7 @@
     <UserSecretsId>c50c313d-9134-4155-afef-382c133c6b74</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aspire.Hosting.InterlockLedgerNode\Aspire.Hosting.InterlockLedgerNode.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Aspire.Hosting.InterlockLedger\Aspire.Hosting.InterlockLedger.csproj"  IsAspireProjectResource="false"/>
     <ProjectReference Include="..\AuditedTransactionsSystem.Web\AuditedTransactionsSystem.Web.csproj" />
   </ItemGroup>
   <ItemGroup>

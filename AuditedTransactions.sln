@@ -20,7 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditedTransactionsSystem.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditedTransactionsSystem.Tests", "AuditedTransactionsSystem.Tests\AuditedTransactionsSystem.Tests.csproj", "{C6BEDB03-E403-45FC-8B46-0ABCD890D526}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspire.Hosting.InterlockLedgerNode", "Aspire.Hosting.InterlockLedgerNode\Aspire.Hosting.InterlockLedgerNode.csproj", "{771A85B9-11A3-4D90-B38B-00C046EB5625}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspire.Hosting.InterlockLedger", "Aspire.Hosting.InterlockLedger\Aspire.Hosting.InterlockLedger.csproj", "{771A85B9-11A3-4D90-B38B-00C046EB5625}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspire.InterlockLedger.Client", "Aspire.InterlockLedger.Client\Aspire.InterlockLedger.Client.csproj", "{661A85B9-11A3-4D90-B38B-00C046EB5625}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +50,10 @@ Global
 		{771A85B9-11A3-4D90-B38B-00C046EB5625}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{771A85B9-11A3-4D90-B38B-00C046EB5625}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{771A85B9-11A3-4D90-B38B-00C046EB5625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661A85B9-11A3-4D90-B38B-00C046EB5625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661A85B9-11A3-4D90-B38B-00C046EB5625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661A85B9-11A3-4D90-B38B-00C046EB5625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661A85B9-11A3-4D90-B38B-00C046EB5625}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

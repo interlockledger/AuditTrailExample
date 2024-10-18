@@ -21,38 +21,28 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography.X509Certificates;
-
-using InterlockLedger.Rest.Client.V14_2_2;
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
 namespace Microsoft.Extensions.Hosting;
 
-public static class InterlockLedgerClientExtensions
+public class InterlockLedgerClientSettings
 {
+    /// <summary>
+    /// Gets or sets the comma-delimited configuration string used to connect to the InterlockLedger node.
+    /// </summary>
+    public string? ConnectionString { get; set; }
 
-    public static IServiceCollection AddInterlockLedgerClient(this IServiceCollection services, string host, string certificatePath, string certificatePassword, ushort? port = null) {
-        services.AddSingleton(new RestNodeV14_2_2(new X509Certificate2(certificatePath.Required(), certificatePassword.Required()), port ?? 32032, host).Required());
-        return services;
-    }
+    /// <summary>
+    /// Gets or sets a boolean value that indicates whether the InterlockLedger health check is disabled or not.
+    /// </summary>
+    /// <value>
+    /// The default value is <see langword="false"/>.
+    /// </value>
+    public bool DisableHealthChecks { get; set; }
 
-    public static IServiceCollection AddInterlockLedgerClientHealthChecks(this IServiceCollection services) {
-        services.AddSingleton<InterlockLedgerClientHealthCheck>();
-        services.AddHealthChecks().AddCheck<InterlockLedgerClientHealthCheck>("node", HealthStatus.Unhealthy, ["node"], TimeSpan.FromSeconds(5));
-        return services;
-    }
-
-    public static WebApplication MapInterlockLedgerClientDefaultEndpoints(this WebApplication app) {
-        if (app.Environment.IsDevelopment()) {
-            app.MapHealthChecks("/healthOfNode", new HealthCheckOptions {
-                Predicate = r => r.Tags.Contains("node")
-            });
-        }
-        return app;
-    }
+    /// <summary>
+    /// Gets or sets a boolean value that indicates whether the OpenTelemetry tracing is disabled or not.
+    /// </summary>
+    /// <value>
+    /// The default value is <see langword="false"/>.
+    /// </value>
+    public bool DisableTracing { get; set; }
 }
-
