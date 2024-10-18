@@ -35,9 +35,11 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddInterlockLedgerClient(Names.InterlockLedgerNode,
-                                          Paths.ClientCertificate,
-                                          Passwords.ClientCertificate);
+builder.Services.AddInterlockLedgerClient(host: Names.InterlockLedgerNode,
+                                          configureOptions: options => {
+                                              options.ClientCertificateFilePath = Paths.ClientCertificate;
+                                              options.ClientCertificatePassword = Passwords.ClientCertificate;
+                                          });
 
 builder.Services.AddInterlockLedgerClientHealthChecks();
 

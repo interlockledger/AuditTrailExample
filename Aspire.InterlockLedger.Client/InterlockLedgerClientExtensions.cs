@@ -21,8 +21,6 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography.X509Certificates;
-
 using InterlockLedger.Rest.Client;
 using InterlockLedger.Rest.Client.V14_2_2;
 
@@ -37,10 +35,12 @@ public static class InterlockLedgerClientExtensions
 {
     private const string _defaultConfigSectionName = "Aspire:InterlockLedger:Client";
 
-    public static IServiceCollection AddInterlockLedgerClient(this IServiceCollection services, string host, string certificatePath, string certificatePassword, ushort? port = null,
+    public static IServiceCollection AddInterlockLedgerClient(this IServiceCollection services, string host,
         Action<InterlockLedgerClientSettings>? configureSettings = null,
         Action<ConfigurationOptions>? configureOptions = null) {
-        services.AddSingleton(new RestNodeV14_2_2(new X509Certificate2(certificatePath.Required(), certificatePassword.Required()), port ?? 32032, host).Required());
+        ConfigurationOptions configurationOptions = new(host, 32032, null, null);
+        configureOptions?.Invoke(configurationOptions);
+        services.AddSingleton(new RestNodeV14_2_2(configurationOptions).Required());
         return services;
     }
 
