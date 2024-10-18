@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0-rc.1.24511.1" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,14 +8,11 @@
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>c50c313d-9134-4155-afef-382c133c6b74</UserSecretsId>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\AuditedTransactionsSystem.ApiService\AuditedTransactionsSystem.ApiService.csproj" />
+    <ProjectReference Include="..\Aspire.Hosting.InterlockLedgerNode\Aspire.Hosting.InterlockLedgerNode.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\AuditedTransactionsSystem.Web\AuditedTransactionsSystem.Web.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.0" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0-rc.1.24511.1" />
   </ItemGroup>
-
 </Project>

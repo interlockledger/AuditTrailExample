@@ -21,22 +21,38 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using InterlockLedger.Rest.Client;
+using System.Security.Cryptography.X509Certificates;
+
 using InterlockLedger.Rest.Client.V14_2_2;
 
-namespace AuditedTransactionsSystem.ApiService;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-public class NodeClientService
+namespace Microsoft.Extensions.Hosting;
+
+public static class InterlockLedgerClientExtensions
 {
-    private readonly RestNodeV14_2_2 _node;
 
-    public NodeClientService(IConfiguration configuration) {
-        string nodeCertificateFilePath = configuration["NodeCertificateFilePath"].Required();
-        string nodeCertificatePassword = configuration["NodeCertificatePassword"].Required();
-        string nodeAddress = configuration["NodeAddress"].Required();
-        ushort nodePort = ushort.Parse(configuration["NodeAddress"].Required());
-        _node = new RestNodeV14_2_2(nodeCertificateFilePath, nodeCertificatePassword, nodePort, nodeAddress);
+    public static IServiceCollection AddInterlockLedgerClient(this IServiceCollection services, string host, string certificatePath, string certificatePassword, ushort? port = null) {
+        services.AddSingleton(new RestNodeV14_2_2(new X509Certificate2(certificatePath.Required(), certificatePassword.Required()), port ?? 32032, host).Required());
+        return services;
     }
 
-    public Task<NodeDetailsModel?> NodeDetails => _node.GetDetailsAsync();
+    public static IServiceCollection AddInterlockLedgerClientHealthChecks(this IServiceCollection services) {
+        services.AddSingleton<InterlockLedgerClientHealthCheck>();
+        services.AddHealthChecks().AddCheck<InterlockLedgerClientHealthCheck>("node", HealthStatus.Unhealthy, ["node"], TimeSpan.FromSeconds(5));
+        return services;
+    }
+
+    public static WebApplication MapInterlockLedgerClientDefaultEndpoints(this WebApplication app) {
+        if (app.Environment.IsDevelopment()) {
+            app.MapHealthChecks("/healthOfNode", new HealthCheckOptions {
+                Predicate = r => r.Tags.Contains("node")
+            });
+        }
+        return app;
+    }
 }
+

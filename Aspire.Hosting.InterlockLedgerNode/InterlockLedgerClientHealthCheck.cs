@@ -21,25 +21,29 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using AuditedTransactionsSystem.ApiService;
+using InterlockLedger.Rest.Client.V14_2_2;
 
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-// Add service defaults & Aspire components.
-builder.AddServiceDefaults();
+namespace Microsoft.Extensions.Hosting;
 
-// Add services to the container.
-builder.Services.AddProblemDetails();
+public class InterlockLedgerClientHealthCheck(RestNodeV14_2_2 restNode) : IHealthCheck
+{
+    private readonly RestNodeV14_2_2 _restNode = restNode.Required();
 
-builder.Services.AddSingleton<NodeClientService>();
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default) =>
+        CheckAsync(cancellationToken);
+    public HealthCheckResult Healthy() => CheckAsync(CancellationToken.None).WaitResult();
 
-var app = builder.Build();
+    private async Task<HealthCheckResult> CheckAsync(CancellationToken cancellationToken) {
+        try {
+            var checkTask = _restNode.GetDetailsAsync();
+            await checkTask.WaitAsync(cancellationToken).ConfigureAwait(false);
+            var details = checkTask.Result.Required();
+            return HealthCheckResult.Healthy($"Node {details.Name} [{details.Id}]");
+        } catch (Exception ex) {
+            return HealthCheckResult.Unhealthy("Can't access IL2 Node", ex);
+        }
+    }
+}
 
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-app.MapGet("node", (NodeClientService node) => node.NodeDetails);
-
-app.MapDefaultEndpoints();
-
-app.Run();

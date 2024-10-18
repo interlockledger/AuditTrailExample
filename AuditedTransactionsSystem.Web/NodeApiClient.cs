@@ -21,59 +21,20 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using System.Text.Json;
+using InterlockLedger.Rest.Client;
+using InterlockLedger.Rest.Client.V14_2_2;
 
 namespace AuditedTransactionsSystem.Web;
 
-public class NodeApiClient(HttpClient httpClient)
+public class NodeApiClient(RestNodeV14_2_2 restNode)
 {
-    public Task<NodeDetails?> NodeDetails(CancellationToken cancellationToken = default) => httpClient.GetFromJsonAsync<NodeDetails>("/node", cancellationToken);
+    private readonly RestNodeV14_2_2 _restNode = restNode.Required();
+
+    public Task<NodeDetailsModel?> NodeDetails(CancellationToken cancellationToken = default) => _restNode.GetDetailsAsync();
+    public void AddToAuditTrial(string userName, string traceIdentifier, string action, string changes) {
+        var chain = _restNode.GetChainsAsync().Result.First();
+        // chain.JsonStore.
+    }
 }
 
-public class NodeDetails
-{
-    public string? Color { get; set; }
 
-    public required string Id { get; set; }
-
-    public string? Name { get; set; }
-
-    public required string Network { get; set; }
-
-    public string? OwnerId { get; set; }
-
-    public string? OwnerName { get; set; }
-
-    public string? PeerAddress { get; set; }
-
-    public IEnumerable<string>? Roles { get; set; }
-
-
-    public string? ResolvedPeerAddress { get; set; }
-
-    public Versions? SoftwareVersions { get; set; }
-
-    public string? Extras { get; set; }
-
-    public IEnumerable<string>? Chains { get; set; }
-
-    public Dictionary<string, string>? Extensions { get; set; }
-
-    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault };
-    public override string ToString() => JsonSerializer.Serialize(this, _options);
-}
-
-public class Versions
-{
-    public string? CoreLibs { get; set; }
-
-    public string? Tags { get; set; }
-
-    public string? Node { get; set; }
-
-    public string? Main { get; set; }
-
-    public string NodeVersion => Main ?? Node ?? "?";
-
-    public string? Peer2peer { get; set; }
-}

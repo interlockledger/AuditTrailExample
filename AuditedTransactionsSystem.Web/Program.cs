@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
-
+using AuditedTransactionsSystem;
 using AuditedTransactionsSystem.Web;
 using AuditedTransactionsSystem.Web.Components;
 
@@ -35,11 +35,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<NodeApiClient>(client => {
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new("https+http://apiservice");
-});
+builder.Services.AddInterlockLedgerClient(Names.InterlockLedgerNode,
+                                          Paths.ClientCertificate,
+                                          Passwords.ClientCertificate);
+
+builder.Services.AddInterlockLedgerClientHealthChecks();
+
+builder.Services.AddSingleton<NodeApiClient>();
 
 var app = builder.Build();
 
@@ -57,8 +59,9 @@ app.UseAntiforgery();
 app.UseOutputCache();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+   .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
+app.MapInterlockLedgerClientDefaultEndpoints();
 
 app.Run();

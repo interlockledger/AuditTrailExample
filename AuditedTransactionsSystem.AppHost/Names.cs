@@ -20,22 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
-using AuditedTransactionsSystem;
 
-var builder = DistributedApplication.CreateBuilder(args);
+namespace AuditedTransactionsSystem;
 
-var node = builder.AddInterlockLedgerNode(name: Names.InterlockLedgerNode,
-                                          dataFolderPath: Paths.NodeData,
-                                          ownerName: Names.NodeOwnerName,
-                                          clientCertificatePassword: Passwords.ClientCertificate,
-                                          nodeCertificatePassword: Passwords.NodeCertificatePassword,
-                                          emergencyKeyPassword: Passwords.EmergencyKeyPassword,
-                                          managerKeyPassword: Passwords.ManagerKeyPassword,
-                                          ownerKeyPassword: Passwords.OwnerKeyPassword);
+public static class Names
+{
+    public const string InterlockLedgerNode = "il2-node";
+    public const string Web = "webfrontend";
+    public const string NodeOwnerName = "client";
+}
 
-builder.AddProject<Projects.AuditedTransactionsSystem_Web>(Names.Web)
-       .WithExternalHttpEndpoints()
-       .WithReference(node)
-       .WaitFor(node);
+public static class Paths
+{
+    public static string NodeData { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), nameof(AuditedTransactionsSystem));
+    public static string ClientCertificate => Path.Combine(NodeData, "il2-node", "certificates", $"mainnet.{Names.NodeOwnerName.ToLowerInvariant()}.rest.api.pfx");
+}
 
-builder.Build().Run();
+public static class Passwords
+{
+    public const string ClientCertificate = "client_password";
+    public const string NodeCertificatePassword = "node_password";
+    public const string EmergencyKeyPassword = "emergency_password";
+    public const string ManagerKeyPassword = "manager_password";
+    public const string OwnerKeyPassword = "owner_password";
+
+}
