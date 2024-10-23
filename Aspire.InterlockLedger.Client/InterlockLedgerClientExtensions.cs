@@ -47,7 +47,7 @@ public static partial class InterlockLedgerClientExtensions
             settings.ConnectionString ??= ConnectionString.Parse(connectionString);
         configureSettings?.Invoke(settings);
 
-        builder.Services.AddSingleton(new RestNodeV14_2_2(settings.ConnectionString.Required()));
+        builder.Services.AddSingleton(sp => new RestNodeV14_2_2(settings.ConnectionString.Required()));
         builder.Services.AddSingleton(sp => new NodeApiClient(sp.GetRequiredService<RestNodeV14_2_2>()));
 
         if (!settings.DisableHealthChecks)
