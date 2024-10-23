@@ -35,7 +35,7 @@ var node = builder.AddInterlockLedgerNode(name: Names.InterlockLedgerNode,
 
 builder.AddProject<Projects.AuditedTransactionsSystem_Web>(Names.Web)
        .WithExternalHttpEndpoints()
-       .WithReference(node)
+       .WithInterlockLedgerNodeReference(node)
        .WaitFor(node);
 
 builder.Build().Run();

@@ -48,9 +48,13 @@ public sealed class InterlockLedgerNodeResource(string name) : ContainerResource
     public EndpointReference P2pEndpoint =>
         _p2pReference ??= new(this, P2pEndpointName);
 
+
+    internal string? ClientCertificatePassword { get; set; }
+    internal string? ClientCertificateFilePath { get; set; }
+
     // Required property on IResourceWithConnectionString. Represents a connection
     // string that applications can use to access the IL2Node server. In this case
-    // the connection string is composed of the SmtpEndpoint endpoint reference.
+    // the connection string is composed of the RestEndpoint endpoint reference.
     public ReferenceExpression ConnectionStringExpression =>
-        ReferenceExpression.Create($"https://{RestEndpoint.Property(EndpointProperty.Host)}:{RestEndpoint.Property(EndpointProperty.Port)}");
+        ReferenceExpression.Create($"https://{RestEndpoint.Property(EndpointProperty.Host)}:{RestEndpoint.Property(EndpointProperty.Port)},{ClientCertificateFilePath},{ClientCertificatePassword}");
 }

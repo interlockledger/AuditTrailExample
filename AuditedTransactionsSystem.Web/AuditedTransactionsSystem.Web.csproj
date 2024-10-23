@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\AuditedTransactionsSystem.AppHost\Names.cs" Link="Names.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Aspire.InterlockLedger.Client\Aspire.InterlockLedger.Client.csproj" />
     <ProjectReference Include="..\AuditedTransactionsSystem.ServiceDefaults\AuditedTransactionsSystem.ServiceDefaults.csproj" />
   </ItemGroup>

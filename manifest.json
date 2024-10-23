@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json.schemastore.org/aspire-8.0.json",
+  "resources": {
+    "il2-node": {
+      "type": "container.v0",
+      "connectionString": "https://{il2-node.bindings.rest.host}:{il2-node.bindings.rest.port}",
+      "image": "il2-slim-node:latest",
+      "bindMounts": [
+        {
+          "source": "C:/ProgramData/AuditedTransactionsSystem",
+          "target": "/app/data",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "INTERLOCKLEDGER_PUBLIC_NODE_ADDRESS": "il2-node",
+        "INTERLOCKLEDGER_CLIENTNAME": "client",
+        "INTERLOCKLEDGER_CERTIFICATE_PASSWORD": "node_password",
+        "IL2MAKE_PASSWORD_CERT": "client_password",
+        "IL2MAKE_PASSWORD_EMERGENCYKEY": "emergency_password",
+        "IL2MAKE_PASSWORD_MANAGER": "manager_password",
+        "IL2MAKE_PASSWORD_OWNER": "owner_password"
+      },
+      "bindings": {
+        "rest": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 32032
+        },
+        "p2p": {
+          "scheme": "ilkl-mainnet",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 32033,
+          "external": true
+        }
+      }
+    },
+    "webfrontend": {
+      "type": "project.v0",
+      "path": "AuditedTransactionsSystem.Web/AuditedTransactionsSystem.Web.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{webfrontend.bindings.http.targetPort}",
+        "ConnectionStrings__il2-node": "{il2-node.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "external": true
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http",
+          "external": true
+        }
+      }
+    }
+  }
+}

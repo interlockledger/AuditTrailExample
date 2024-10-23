@@ -21,37 +21,20 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using Microsoft.Extensions.Configuration;
+using InterlockLedger.Rest.Client;
+using InterlockLedger.Rest.Client.V14_2_2;
 
 namespace Microsoft.Extensions.Hosting;
 
-public sealed class InterlockLedgerClientSettings
+public class NodeApiClient(RestNodeV14_2_2 restNode)
 {
-    internal const string DefaultConfigSectionName = "Aspire:InterlockLedger:Client";
+    private readonly RestNodeV14_2_2 _restNode = restNode.Required();
 
-    /// <summary>
-    /// Gets or sets the comma-delimited configuration string used to connect to the InterlockLedger node.
-    /// </summary>
-    public InterlockLedger.Rest.Client.ConnectionString? ConnectionString { get; set; }
-
-    /// <summary>
-    /// Gets or sets a boolean value that indicates whether the InterlockLedger health check is disabled or not.
-    /// </summary>
-    /// <value>
-    /// The default value is <see langword="false"/>.
-    /// </value>
-    public bool DisableHealthChecks { get; set; }
-
-}
-
-internal static class IConfigurationExtensions
-{
-    public static InterlockLedgerClientSettings GetInterlockLedgerClientSettings(this IConfiguration configuration) {
-        var settings = new InterlockLedgerClientSettings();
-        configuration
-               .GetSection(InterlockLedgerClientSettings.DefaultConfigSectionName)
-               .Bind(settings);
-        return settings;
+    public Task<NodeDetailsModel?> NodeDetails(CancellationToken cancellationToken = default) => _restNode.GetDetailsAsync();
+    public void AddToAuditTrial(string userName, string traceIdentifier, string action, string changes) {
+        var chain = _restNode.GetChainsAsync().Result.First();
+        // chain.JsonStore.
     }
-
 }
+
+

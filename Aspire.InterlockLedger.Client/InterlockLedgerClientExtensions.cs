@@ -24,39 +24,37 @@
 using InterlockLedger.Rest.Client;
 using InterlockLedger.Rest.Client.V14_2_2;
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Microsoft.Extensions.Hosting;
 
-public static class InterlockLedgerClientExtensions
+public static partial class InterlockLedgerClientExtensions
 {
-    private const string _defaultConfigSectionName = "Aspire:InterlockLedger:Client";
+    /// <summary>
+    /// Adds a client to an InterlockLedger Node
+    /// </summary>
+    /// <param name="builder">Builder for host app</param>
+    /// <param name="configureSettings">Action to change <see cref="InterlockLedgerClientSettings"/> read from configuration at "Aspire:InterlockLedger:Client" path</param>
+    /// <returns>The builder with needed pieces. Inject on your code the provided <see cref="NodeApiClient"/></returns>
+    public static IHostApplicationBuilder AddInterlockLedgerClient(this IHostApplicationBuilder builder,
+                                                                   Action<InterlockLedgerClientSettings>? configureSettings = null) {
+        string connectionName = builder.Configuration["INTERLOCKLEDGER_NODE"].WithDefault("il2-node");
+        string? connectionString = builder.Configuration.GetConnectionString(connectionName);
+        var settings = builder.Configuration.GetInterlockLedgerClientSettings();
+        if (!connectionString.IsBlank()) // TODO fix parsing on REST library to accept both schemes
+            settings.ConnectionString ??= ConnectionString.Parse(connectionString.Replace("https://", "ilkl-mainnet://"));
+        configureSettings?.Invoke(settings);
 
-    public static IServiceCollection AddInterlockLedgerClient(this IServiceCollection services, string host,
-        Action<InterlockLedgerClientSettings>? configureSettings = null,
-        Action<ConfigurationOptions>? configureOptions = null) {
-        ConfigurationOptions configurationOptions = new(host, 32032, null, null);
-        configureOptions?.Invoke(configurationOptions);
-        services.AddSingleton(new RestNodeV14_2_2(configurationOptions).Required());
-        return services;
+        builder.Services.AddSingleton(new RestNodeV14_2_2(settings.ConnectionString.Required()));
+        builder.Services.AddSingleton(sp => new NodeApiClient(sp.GetRequiredService<RestNodeV14_2_2>()));
+
+        if (!settings.DisableHealthChecks)
+            builder.Services.AddHealthChecks().AddCheck<InterlockLedgerClientHealthCheck>("node", HealthStatus.Unhealthy, ["node"], TimeSpan.FromSeconds(5));
+
+        return builder;
     }
 
-    public static IServiceCollection AddInterlockLedgerClientHealthChecks(this IServiceCollection services) {
-        services.AddSingleton<InterlockLedgerClientHealthCheck>();
-        services.AddHealthChecks().AddCheck<InterlockLedgerClientHealthCheck>("node", HealthStatus.Unhealthy, ["node"], TimeSpan.FromSeconds(5));
-        return services;
-    }
-
-    public static WebApplication MapInterlockLedgerClientDefaultEndpoints(this WebApplication app) {
-        if (app.Environment.IsDevelopment()) {
-            app.MapHealthChecks("/healthOfNode", new HealthCheckOptions {
-                Predicate = r => r.Tags.Contains("node")
-            });
-        }
-        return app;
-    }
 }
 

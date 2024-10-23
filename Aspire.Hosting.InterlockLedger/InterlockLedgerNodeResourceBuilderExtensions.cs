@@ -51,7 +51,10 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                                                                                        string ownerKeyPassword,
                                                                                        int? restPort = null,
                                                                                        int? p2pPort = null) {
-        var resource = new InterlockLedgerNodeResource(name);
+        var resource = new InterlockLedgerNodeResource(name) {
+            ClientCertificatePassword = NonBlank(clientCertificatePassword),
+            ClientCertificateFilePath = Path.Combine(FolderMustExist(dataFolderPath), "il2-node", "certificates", $"mainnet.{NonBlank(ownerName).ToLowerInvariant()}.rest.api.pfx")
+        };
 
         return builder.AddResource(resource)
                       .WithImage("il2-slim-node")
@@ -59,15 +62,44 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                       .WithEndpoint(targetPort: 32033, port: p2pPort ?? 32033, name: InterlockLedgerNodeResource.P2pEndpointName, scheme: "ilkl-mainnet", isProxied: false, isExternal: true)
                       .WithBindMount(dataFolderPath, "/app/data")
                       .WithEnvironment("INTERLOCKLEDGER_PUBLIC_NODE_ADDRESS", NonBlank(name))
-                      .WithEnvironment("INTERLOCKLEDGER_CLIENTNAME", NonBlank(ownerName))
+                      .WithEnvironment("INTERLOCKLEDGER_CLIENTNAME", ownerName)
                       .WithEnvironment("INTERLOCKLEDGER_CERTIFICATE_PASSWORD", NonBlank(nodeCertificatePassword))
-                      .WithEnvironment("IL2MAKE_PASSWORD_CERT", NonBlank(clientCertificatePassword))
+                      .WithEnvironment("IL2MAKE_PASSWORD_CERT", clientCertificatePassword)
                       .WithEnvironment("IL2MAKE_PASSWORD_EMERGENCYKEY", NonBlank(emergencyKeyPassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_MANAGER", NonBlank(managerKeyPassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_OWNER", NonBlank(ownerKeyPassword))
                ;
+
     }
+
+    private static string FolderMustExist(string folderPath, [CallerArgumentExpression(nameof(folderPath))] string? name = null) =>
+        Directory.Exists(folderPath) ? folderPath : throw new ArgumentException($"'{name}' must be an existing directory! '{folderPath}' does not exist");
+
     private static string NonBlank(string value, [CallerArgumentExpression(nameof(value))] string? name = null) =>
         string.IsNullOrWhiteSpace(value) ? throw new ArgumentException($"'{name}' cannot be null or whitespace.", name) : value;
+
+    /// <summary>
+    /// Injects a connection string as an environment variable from the source resource into the destination resource, using the source resource's name as the connection string name.
+    /// The format of the environment variable will be "ConnectionStrings__{sourceResourceName}={connectionString}".
+    /// Also injects an environment variable as "INTERLOCKLEDGER_NODE={sourceResourceName}" for the client to know which connection string to look after.
+    /// <para>
+    /// Each resource defines the format of the connection string value. The
+    /// underlying connection string value can be retrieved using <see cref="IResourceWithConnectionString.GetConnectionStringAsync(CancellationToken)"/>.
+    /// </para>
+    /// <para>
+    /// Connection strings are also resolved by the configuration system (appSettings.json in the AppHost project, or environment variables). If a connection string is not found on the resource, the configuration system will be queried for a connection string
+    /// using the resource's name.
+    /// </para>
+    /// </summary>
+    /// <typeparam name="T">The destination resource.</typeparam>
+    /// <param name="builder">The resource where connection string will be injected.</param>
+    /// <param name="node">The InterlockLedgerNode resource from which to extract the connection string.</param>
+    /// <exception cref="DistributedApplicationException">Throws an exception if the connection string resolves to null. It can be null if the resource has no connection string, and if the configuration has no connection string for the source resource.</exception>
+    /// <returns>A reference to the <see cref="IResourceBuilder{T}"/>.</returns>
+    public static IResourceBuilder<T> WithInterlockLedgerNodeReference<T>(this IResourceBuilder<T> builder,
+                                                                          IResourceBuilder<InterlockLedgerNodeResource> node) where T : IResourceWithEnvironment =>
+        builder
+            .WithReference(node)
+            .WithEnvironment("INTERLOCKLEDGER_NODE", node.Resource.Name);
 
 }

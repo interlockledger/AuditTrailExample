@@ -26,15 +26,6 @@ using InterlockLedger.Rest.Client.V14_2_2;
 
 namespace AuditedTransactionsSystem.Web;
 
-public class NodeApiClient(RestNodeV14_2_2 restNode)
-{
-    private readonly RestNodeV14_2_2 _restNode = restNode.Required();
 
-    public Task<NodeDetailsModel?> NodeDetails(CancellationToken cancellationToken = default) => _restNode.GetDetailsAsync();
-    public void AddToAuditTrial(string userName, string traceIdentifier, string action, string changes) {
-        var chain = _restNode.GetChainsAsync().Result.First();
-        // chain.JsonStore.
-    }
-}
 
 

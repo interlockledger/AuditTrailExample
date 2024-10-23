@@ -24,6 +24,8 @@ using AuditedTransactionsSystem;
 using AuditedTransactionsSystem.Web;
 using AuditedTransactionsSystem.Web.Components;
 
+using InterlockLedger.Rest.Client;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
@@ -35,15 +37,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddInterlockLedgerClient(host: Names.InterlockLedgerNode,
-                                          configureOptions: options => {
-                                              options.ClientCertificateFilePath = Paths.ClientCertificate;
-                                              options.ClientCertificatePassword = Passwords.ClientCertificate;
-                                          });
-
-builder.Services.AddInterlockLedgerClientHealthChecks();
-
-builder.Services.AddSingleton<NodeApiClient>();
+builder.AddInterlockLedgerClient();
 
 var app = builder.Build();
 
@@ -64,6 +58,5 @@ app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
-app.MapInterlockLedgerClientDefaultEndpoints();
 
 app.Run();
