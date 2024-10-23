@@ -21,9 +21,9 @@
 // SOFTWARE.
 // ******************************************************************************************************************************
 
-using System.Runtime.CompilerServices;
-
 using Aspire.Hosting.ApplicationModel;
+
+using static Aspire.Hosting.StringHelpers;
 
 namespace Aspire.Hosting;
 
@@ -49,17 +49,14 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                                                                                        string emergencyKeyPassword,
                                                                                        string managerKeyPassword,
                                                                                        string ownerKeyPassword,
+                                                                                       string? network = null,
                                                                                        int? restPort = null,
                                                                                        int? p2pPort = null) {
-        var resource = new InterlockLedgerNodeResource(name) {
-            ClientCertificatePassword = NonBlank(clientCertificatePassword),
-            ClientCertificateFilePath = Path.Combine(FolderMustExist(dataFolderPath), "il2-node", "certificates", $"mainnet.{NonBlank(ownerName).ToLowerInvariant()}.rest.api.pfx")
-        };
-
+        var resource = new InterlockLedgerNodeResource(name, dataFolderPath, ownerName, clientCertificatePassword, network);
         return builder.AddResource(resource)
                       .WithImage("il2-slim-node")
                       .WithHttpsEndpoint(targetPort: 32032, port: restPort ?? 32032, name: InterlockLedgerNodeResource.RestEndpointName, isProxied: false)
-                      .WithEndpoint(targetPort: 32033, port: p2pPort ?? 32033, name: InterlockLedgerNodeResource.P2pEndpointName, scheme: "ilkl-mainnet", isProxied: false, isExternal: true)
+                      .WithEndpoint(targetPort: 32033, port: p2pPort ?? 32033, name: InterlockLedgerNodeResource.P2pEndpointName, scheme: $"ilkl-{resource.Network}", isProxied: false, isExternal: true)
                       .WithBindMount(dataFolderPath, "/app/data")
                       .WithEnvironment("INTERLOCKLEDGER_PUBLIC_NODE_ADDRESS", NonBlank(name))
                       .WithEnvironment("INTERLOCKLEDGER_CLIENTNAME", ownerName)
@@ -72,11 +69,6 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
 
     }
 
-    private static string FolderMustExist(string folderPath, [CallerArgumentExpression(nameof(folderPath))] string? name = null) =>
-        Directory.Exists(folderPath) ? folderPath : throw new ArgumentException($"'{name}' must be an existing directory! '{folderPath}' does not exist");
-
-    private static string NonBlank(string value, [CallerArgumentExpression(nameof(value))] string? name = null) =>
-        string.IsNullOrWhiteSpace(value) ? throw new ArgumentException($"'{name}' cannot be null or whitespace.", name) : value;
 
     /// <summary>
     /// Injects a connection string as an environment variable from the source resource into the destination resource, using the source resource's name as the connection string name.

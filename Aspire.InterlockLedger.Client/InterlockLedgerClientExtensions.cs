@@ -43,8 +43,8 @@ public static partial class InterlockLedgerClientExtensions
         string connectionName = builder.Configuration["INTERLOCKLEDGER_NODE"].WithDefault("il2-node");
         string? connectionString = builder.Configuration.GetConnectionString(connectionName);
         var settings = builder.Configuration.GetInterlockLedgerClientSettings();
-        if (!connectionString.IsBlank()) // TODO fix parsing on REST library to accept both schemes
-            settings.ConnectionString ??= ConnectionString.Parse(connectionString.Replace("https://", "ilkl-mainnet://"));
+        if (!connectionString.IsBlank())
+            settings.ConnectionString ??= ConnectionString.Parse(connectionString);
         configureSettings?.Invoke(settings);
 
         builder.Services.AddSingleton(new RestNodeV14_2_2(settings.ConnectionString.Required()));
