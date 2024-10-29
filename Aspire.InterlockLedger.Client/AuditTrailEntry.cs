@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2024 InterlockLedger
 //
@@ -20,40 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
-using AuditedTransactionsSystem.Web.Components;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace Microsoft.Extensions.Hosting;
 
-// Add service defaults & Aspire components.
-builder.AddServiceDefaults();
+public record AuditTrailEntry(string UserName, string TraceIdentifier, string Action, string Changes) { }
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
 
-builder.Services.AddOutputCache();
-builder.Services.AddHttpContextAccessor();
-
-builder.AddInterlockLedgerClient();
-
-var app = builder.Build();
-
-if (!app.Environment.IsDevelopment()) {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-app.UseOutputCache();
-
-app.MapRazorComponents<App>()
-   .AddInteractiveServerRenderMode();
-
-app.MapDefaultEndpoints();
-
-app.Run();

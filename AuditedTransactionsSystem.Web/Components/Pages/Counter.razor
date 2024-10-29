@@ -1,5 +1,7 @@
-﻿@page "/counter"
+@page "/counter"
 @rendermode InteractiveServer
+@inject NodeApiClient NodeApi
+@inject IHttpContextAccessor ContextAccessor
 
 <PageTitle>Counter</PageTitle>
 
@@ -7,13 +9,32 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Increment</button>
+<button class="btn btn-primary" @onclick="DecrementCount">Decrement</button>
+<p role="status">Last audit: @lastAudit</p>
+<p role="status">Details: @lastAuditDetails</p>
 
 @code {
     private int currentCount = 0;
+    private string lastAudit = "";
+    private AuditTrailEntry? lastAuditDetails;
 
     private void IncrementCount()
     {
         currentCount++;
+        Audit(nameof(IncrementCount));
+    }
+
+    private void DecrementCount()
+    {
+        currentCount--;
+        Audit(nameof(DecrementCount));
+    }
+
+    private void Audit(string action)
+    {
+        var result = NodeApi.AddToAuditTrialAsync("CounterUser", ContextAccessor.HttpContext.TraceIdentifier, action, $"Counter is now {currentCount}").Result;
+        lastAudit = result ?? "ERROR";
+        lastAuditDetails = NodeApi.GetAuditTrailEntryAsync(lastAudit).Result;
     }
 }
