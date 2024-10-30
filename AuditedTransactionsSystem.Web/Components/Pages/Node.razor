@@ -20,10 +20,12 @@ else
 }
 
 @code {
+
     private InterlockLedger.Rest.Client.NodeDetailsModel? details;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        details = await NodeApi.NodeDetails();
+        details = NodeApi.NodeDetails;
+        return Task.CompletedTask;
     }
 }

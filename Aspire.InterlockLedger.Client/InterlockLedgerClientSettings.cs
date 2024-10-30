@@ -41,7 +41,6 @@ public sealed class InterlockLedgerClientSettings
     /// The default value is <see langword="false"/>.
     /// </value>
     public bool DisableHealthChecks { get; set; }
-
 }
 
 internal static class IConfigurationExtensions
@@ -53,5 +52,4 @@ internal static class IConfigurationExtensions
                .Bind(settings);
         return settings;
     }
-
 }

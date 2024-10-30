@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //
 // Copyright (c) 2024 InterlockLedger
 //
@@ -20,9 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
+using InterlockLedger.Rest.Client;
+using InterlockLedger.Rest.Client.V14_2_2;
 
-namespace Microsoft.Extensions.Hosting;
+namespace AuditedTransactionsSystem.Web;
 
-public record AuditTrailEntry(string UserName, string TraceIdentifier, string Action, string Changes) { }
+public class AuditTrailClient(NodeApiClient apiClient)
+{
+    public async Task<JsonDocumentModel?> AddToAuditTrialAsync(string userName, string traceIdentifier, string action, string changes) =>
+        await apiClient.GetWritableJsonStore(null).Add(new AuditTrailEntry(userName, traceIdentifier, action, changes)).ConfigureAwait(false);
 
-
+    public async Task<AuditTrailEntry?> GetAuditTrailEntryAsync(UniversalRecordReference reference) =>
+        await apiClient.GetReadableJsonStore(reference).RetrieveDecodedAs<AuditTrailEntry>(reference.Serial).ConfigureAwait(false);
+}

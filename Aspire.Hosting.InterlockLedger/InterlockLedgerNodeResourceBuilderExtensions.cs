@@ -65,7 +65,6 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                       .WithEnvironment("IL2MAKE_PASSWORD_EMERGENCYKEY", NonBlank(emergencyKeyPassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_MANAGER", NonBlank(managerKeyPassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_OWNER", NonBlank(ownerKeyPassword))
-                      //.WithHttpsHealthCheck(path:"health", endpointName: InterlockLedgerNodeResource.RestEndpointName)
                ;
 
     }

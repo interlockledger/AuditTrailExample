@@ -20,12 +20,5 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
-
-using InterlockLedger.Rest.Client;
-using InterlockLedger.Rest.Client.V14_2_2;
-
 namespace AuditedTransactionsSystem.Web;
-
-
-
-
+public record AuditTrailEntry(string UserName, string TraceIdentifier, string Action, string Changes) { }

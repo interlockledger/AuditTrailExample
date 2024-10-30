@@ -47,14 +47,15 @@ public static partial class InterlockLedgerClientExtensions
             settings.ConnectionString ??= ConnectionString.Parse(connectionString);
         configureSettings?.Invoke(settings);
 
-        builder.Services.AddSingleton(sp => new RestNodeV14_2_2(settings.ConnectionString.Required()));
-        builder.Services.AddSingleton(sp => new NodeApiClient(sp.GetRequiredService<RestNodeV14_2_2>()));
+        var restClient = new RestNodeV14_2_2(settings.ConnectionString.Required());
+        var nodeApiClient = new NodeApiClient(restClient);
+        builder.Services.AddSingleton(restClient);
+        builder.Services.AddSingleton(nodeApiClient);
 
         if (!settings.DisableHealthChecks)
             builder.Services.AddHealthChecks().AddCheck<InterlockLedgerClientHealthCheck>("node", HealthStatus.Unhealthy, ["node"], TimeSpan.FromSeconds(5));
 
         return builder;
     }
-
 }
 

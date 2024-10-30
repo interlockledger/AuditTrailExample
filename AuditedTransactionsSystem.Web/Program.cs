@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ******************************************************************************************************************************
+using AuditedTransactionsSystem.Web;
 using AuditedTransactionsSystem.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddOutputCache();
 builder.Services.AddHttpContextAccessor();
 
 builder.AddInterlockLedgerClient();
+builder.Services.AddSingleton<AuditTrailClient>();
 
 var app = builder.Build();
 
