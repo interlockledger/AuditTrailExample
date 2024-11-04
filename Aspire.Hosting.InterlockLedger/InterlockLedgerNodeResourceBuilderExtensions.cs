@@ -33,15 +33,20 @@ namespace Aspire.Hosting;
 public static class InterlockLedgerNodeResourceBuilderExtensions
 {
     /// <summary>
+    /// Hardcoded in the initialization script for the image
+    /// </summary>
+    private const string _pathToData = "/app/data";
+
+    /// <summary>
     /// Adds an IL2 Node resource to the application.
     /// </summary>
     /// <param name="builder">The <see cref="IDistributedApplicationBuilder"/>.</param>
-    /// <param name="name">The name of the resource.</param>
+    /// <param name="resourceName">The name of the resource.</param>
     /// <param name="restPort">Optional port to expose for REST endpoint [defaults to 32032]</param>
     /// <param name="restPort">Optional port to expose for P2P endpoint [defaults to 32033]</param>
     /// <returns>The <see cref="IResourceBuilder{T}"/> for chaining.</returns>
     public static IResourceBuilder<InterlockLedgerNodeResource> AddInterlockLedgerNode(this IDistributedApplicationBuilder builder,
-                                                                                       [ResourceName] string name,
+                                                                                       [ResourceName] string resourceName,
                                                                                        string dataFolderPath,
                                                                                        string ownerName,
                                                                                        string clientCertificatePassword,
@@ -52,13 +57,17 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                                                                                        string? network = null,
                                                                                        int? restPort = null,
                                                                                        int? p2pPort = null) {
-        var resource = new InterlockLedgerNodeResource(name, dataFolderPath, ownerName, clientCertificatePassword, network);
+        var resource = new InterlockLedgerNodeResource(NonBlank(resourceName), dataFolderPath, ownerName, clientCertificatePassword, network);
+        string clientRootPath = $"{_pathToData}/{resourceName}";
         return builder.AddResource(resource)
                       .WithImage("il2-slim-node")
                       .WithHttpsEndpoint(targetPort: 32032, port: restPort ?? 32032, name: InterlockLedgerNodeResource.RestEndpointName, isProxied: false)
                       .WithEndpoint(targetPort: 32033, port: p2pPort ?? 32033, name: InterlockLedgerNodeResource.P2pEndpointName, scheme: $"ilkl-{resource.Network}", isProxied: false, isExternal: true)
-                      .WithBindMount(dataFolderPath, "/app/data")
-                      .WithEnvironment("INTERLOCKLEDGER_PUBLIC_NODE_ADDRESS", NonBlank(name))
+                      .WithBindMount(dataFolderPath, _pathToData)
+                      .WithEnvironment("INTERLOCKLEDGER_PUBLIC_NODE_ADDRESS", resourceName)
+                      .WithEnvironment("INTERLOCKLEDGER_CLIENT_ROOT", clientRootPath)
+                      .WithEnvironment("INTERLOCKLEDGER_NODE_STORAGE_ROOT", $"{clientRootPath}/node")
+                      .WithEnvironment("INTERLOCKLEDGER_CERTIFICATE_ROOT", $"{clientRootPath}/certificates")
                       .WithEnvironment("INTERLOCKLEDGER_CLIENTNAME", ownerName)
                       .WithEnvironment("INTERLOCKLEDGER_CERTIFICATE_PASSWORD", NonBlank(nodeCertificatePassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_CERT", clientCertificatePassword)
@@ -66,7 +75,6 @@ public static class InterlockLedgerNodeResourceBuilderExtensions
                       .WithEnvironment("IL2MAKE_PASSWORD_MANAGER", NonBlank(managerKeyPassword))
                       .WithEnvironment("IL2MAKE_PASSWORD_OWNER", NonBlank(ownerKeyPassword))
                ;
-
     }
 
 

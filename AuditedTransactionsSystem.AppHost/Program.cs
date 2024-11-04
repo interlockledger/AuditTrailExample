@@ -24,7 +24,7 @@ using AuditedTransactionsSystem;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var node = builder.AddInterlockLedgerNode(name: Names.InterlockLedgerNode,
+var node = builder.AddInterlockLedgerNode(resourceName: Names.InterlockLedgerNode,
                                           dataFolderPath: Paths.NodeData,
                                           ownerName: Names.NodeOwnerName,
                                           clientCertificatePassword: Passwords.ClientCertificate,
